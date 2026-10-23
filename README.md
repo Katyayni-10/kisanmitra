@@ -1,82 +1,138 @@
-# KisanMitra - Multilingual Voice Assistant for Farmers, Rural and Elderly Users
+# 🌾 KisanMitra — A Multilingual AI Assistant for Farmers
 
-One app, one conversation. A farmer can **show a sick leaf** or **just speak** in Hindi or another Indian language.
-KisanMitra diagnoses the crop problem, explains the cure, and then keeps helping with crop insurance, loans,
-pensions, health information, forms and scam safety - all answered **by voice**.
+**KisanMitra** (meaning *Farmer’s Friend*) is a voice-first AI assistant designed to help farmers, rural families, and elderly users access agricultural guidance and essential information in their preferred Indian language.
 
-```
- Leaf photo -> EfficientNet-B0 (train.py) -> diagnosis --+
-                                                         v
- Mic -> Groq Whisper -> Groq LLM (+ scheme knowledge base + diagnosis context) -> gTTS voice reply
-                              ^
-              emergency keyword guard runs first
-```
-The link between the two halves is the story for judges: after "your tomato has early blight", the farmer can ask
-"my crop is badly damaged, can I get money?" and KisanMitra answers using **the diagnosis plus the crop insurance
-scheme (report within 72 hours)**.
+The project combines deep learning, generative AI, and speech technologies to make agricultural support more accessible, especially for users who may face language barriers or difficulty navigating text-heavy applications.
 
-## Files
-| File | Purpose |
+## 🎯 Problem Statement
+
+Farmers and rural communities often face challenges such as:
+- Identifying crop diseases before they cause significant damage.
+- Finding understandable information about government schemes and crop insurance.
+- Navigating application procedures and required documentation.
+- Accessing digital services that depend on English literacy and typing.
+
+KisanMitra aims to bring these forms of assistance together in one simple, voice-first interface.
+
+## ✨ Key Features
+
+### 🌿 1. AI-Powered Crop Disease Detection
+- Accepts a photograph of a crop leaf for analysis.
+- Uses an **EfficientNet-B0** deep learning model trained on the PlantVillage dataset.
+- Predicts a disease class and provides a confidence score.
+- Uses the diagnosis as context for subsequent agricultural questions.
+
+### 🗣️ 2. Multilingual Voice Assistance
+- Supports interaction in 10 Indian languages.
+- Uses OpenAI Whisper for speech recognition.
+- Generates responses using a large language model accessed through Groq.
+- Uses Google Text-to-Speech (gTTS) to read answers aloud.
+
+### 🌱 3. Agricultural Guidance
+- Provides general information about crop diseases and treatment options.
+- Explains recommended next steps in simple language.
+- Encourages users to consult local agricultural experts for confirmation.
+
+### 🏛️ 4. Government Scheme Assistance
+- Helps users understand schemes such as PM-KISAN and the Pradhan Mantri Fasal Bima Yojana (PMFBY).
+- Explains eligibility criteria and commonly required documents.
+- Offers step-by-step guidance for navigating application procedures.
+
+### 🛡️ 5. Everyday Information and Safety
+- Answers general questions related to health and everyday concerns.
+- Helps users recognize potential scams and suspicious claims.
+- Aims to make essential information easier to understand through conversational assistance.
+
+## ⚙️ How It Works
+
+1. **User input:** The user uploads a leaf photograph or asks a question using voice.
+2. **Image analysis:** The EfficientNet-B0 model predicts the crop disease from the photograph.
+3. **Speech recognition:** Whisper converts spoken input into text.
+4. **AI response generation:** A Groq-hosted language model generates a contextual response using the available information and crop diagnosis when relevant.
+5. **Voice output:** gTTS converts the generated response into speech.
+6. **User interaction:** The user can continue the conversation and ask follow-up questions.
+
+## 🧰 Tech Stack
+
+| Technology | Purpose |
 |---|---|
-| `app.py` | Streamlit UI: big fonts, camera/upload, mic, language and mode selector, autoplay reply |
-| `assistant.py` | Prompt, Groq chat call, crop-diagnosis context, emergency detection, text cleanup for speech |
-| `vision.py` | Loads the trained model and predicts the disease from a leaf photo |
-| `train.py` | Trains the leaf classifier, saves model + metrics + confusion matrix |
-| `knowledge.py` | 12 government schemes + scam tips + helplines (**edit and verify this!**) |
-| `voice.py` | Groq Whisper speech-to-text and gTTS text-to-speech, 10 languages |
+| Python | Core development |
+| PyTorch | Deep learning and model inference |
+| EfficientNet-B0 | Crop disease classification |
+| PlantVillage | Crop leaf image dataset |
+| Groq API | Access to a generative language model |
+| OpenAI Whisper | Speech recognition |
+| gTTS | Text-to-speech generation |
+| Streamlit | User interface and application workflow |
 
-## Setup
-```bash
-pip install -r requirements.txt
-export GROQ_API_KEY=your_key_here        # Windows: set GROQ_API_KEY=your_key_here
+## 🏗️ System Architecture
+
+```text
+             User
+               |
+       Voice or Leaf Image
+               |
+        Streamlit Interface
+               |
+       +-------+-------+
+       |               |
+   Leaf Image       Voice Input
+       |               |
+ EfficientNet-B0     Whisper
+       |               |
+ Disease Prediction   Query Text
+       |               |
+       +-------+-------+
+               |
+       Contextual AI Response
+           (Groq LLM)
+               |
+       Text / Voice Output
+               |
+             User
 ```
-Optional: `KISANMITRA_LLM` (default `llama-3.3-70b-versatile`) and `KISANMITRA_STT` (default `whisper-large-v3`).
-If Groq renames or retires a model, pick another from your Groq console.
 
-## Step 1 - Train the leaf model (free GPU on Colab or Kaggle)
-1. Get PlantVillage (Kaggle: "New Plant Diseases Dataset" or "PlantVillage"). Use the folder that directly contains
-   one sub-folder per class, e.g. `Tomato___Early_blight/`.
-2. `python train.py --data /path/to/PlantVillage`
-3. Copy the generated `model/` folder (model.pt, classes.json) next to `app.py`.
-   Expect about 97-99% validation accuracy on PlantVillage.
+## 🎯 Project Objectives
 
-## Step 2 - Run
-```bash
-streamlit run app.py
-```
-Open the "Network URL" on your phone (same Wi-Fi) to use the phone camera and mic.
-Without `model/`, the leaf-photo section shows a note and the voice assistant still works.
+- Make AI-powered agricultural guidance more accessible.
+- Reduce language and literacy barriers in digital assistance.
+- Combine computer vision with conversational AI in a practical application.
+- Explore how voice interfaces can improve technology accessibility for underserved communities.
 
-## Before the exhibition
-- [ ] **Verify `knowledge.py`** against official sites (pmkisan.gov.in, pmjay.gov.in, pmfby.gov.in...). Amounts and rules change.
-- [ ] Test 5-10 real leaf photos (print some), not only dataset images.
-- [ ] Test each language you plan to show. Speech recognition is best for Hindi; others vary.
-- [ ] Record a backup video (Groq and gTTS need internet).
-- [ ] Browsers may block autoplay on first load; tapping the mic once fixes this.
-- [ ] Show `model/confusion_matrix.png` and `metrics.json` on a slide.
+## ⚠️ Limitations and Responsible Use
 
-## Demo script (3 minutes)
-1. Language Hindi. Open "Check a crop leaf", upload a tomato blight photo -> diagnosis card + spoken advice.
-2. Tap the mic: *"फसल बहुत खराब हो गई, क्या मुझे पैसे मिल सकते हैं?"* -> crop insurance, 72-hour reporting, helpline 14447.
-3. Mode "Help with a form": *"मुझे पीएम किसान में नाम लिखवाना है"* -> one question at a time, then documents.
-4. Say *"फोन पर कोई OTP मांग रहा है"* -> scam warning and 1930.
-5. Say *"सीने में दर्द हो रहा है"* -> red emergency banner (call 108/112) appears instantly, before the AI answer.
-6. Switch to Tamil or Punjabi and repeat a question so people see it is truly multilingual.
+- The disease classifier is based on PlantVillage data, so performance on real-world field photographs may differ from performance on dataset images.
+- The model covers the crop and disease classes represented in its training data; it cannot identify every possible crop condition.
+- AI-generated agricultural recommendations are informational and should be verified with qualified agricultural experts.
+- Scheme eligibility, application requirements, and reporting deadlines can change and should be confirmed through official sources.
+- Health-related responses are general information, not a substitute for professional medical care.
+- Internet access is required for the relevant cloud-based AI and speech services.
+- This project is a prototype and has not been presented as a validated, production-ready agricultural advisory service.
 
-## Design choices to explain
-- **One conversation:** the leaf diagnosis becomes context for every follow-up question.
-- **Grounded answers:** scheme facts come from a curated knowledge base; the model is told not to invent amounts.
-- **Safety first:** emergency guard runs before the LLM; no OTPs, no medicine or pesticide doses.
-- **Accessibility:** voice-first, large fonts, one question at a time, short spoken-style replies with no symbols.
+## 🚀 Future Scope
 
-## Honest limitations
-- Leaf model is trained on PlantVillage (38 classes, mostly clean lab images); real-field accuracy is lower.
-- General information only, not medical, legal or agronomy advice; confirm with KVK / CSC.
-- Knowledge base covers 12 central schemes; state schemes vary and are not included.
-- Needs internet for speech and the LLM. Voice quality in Gujarati, Kannada, Malayalam can be weaker.
+- Expand disease detection to additional crops, including rice and wheat.
+- Improve robustness using real-world field photographs.
+- Add weather forecasts and market-price information.
+- Incorporate verified, state-specific government scheme information.
+- Explore offline or low-connectivity functionality.
+- Improve response reliability through trusted agricultural knowledge sources and expert validation.
 
-## Ideas if you finish early
-- Grad-CAM heatmap showing which part of the leaf the model looked at
-- Add your own state's schemes to `knowledge.py`
-- Fine-tune on a few real leaf photos you take yourself
-- Log questions to a CSV and chart which topics people ask about most
+## 💡 Learning Outcomes
+
+Building KisanMitra provided an opportunity to explore:
+- Deep learning-based image classification.
+- Integration of computer vision and generative AI.
+- Speech recognition and text-to-speech pipelines.
+- Context-aware conversational interactions.
+- Designing accessible, multilingual AI applications around real-world problems.
+
+## 👩‍💻 Project Status
+
+**Status:** Prototype / development project
+
+KisanMitra is a project exploring how deep learning, generative AI, and multilingual voice interaction can work together to make agricultural and everyday information more accessible.
+
+---
+
+*Built with the goal of making technology more inclusive, understandable, and useful for the people who need it most.* 🌱
